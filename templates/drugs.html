@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Drugs</h1>
+        <a href="{{ url_for('add_drug') }}" class="btn btn-primary mb-2">Add Drug</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date of Manufacture</th>
+                    <th>Date of Expiry</th>
+                    <th>MRP</th>
+                    <th>Cost Price</th>
+                    <th>Type</th>
+                    <th>Use</th>
+                    <th>Quantity</th>
+                    <th>Distributor ID</th>
+                    <th>User ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for drug in drugs.items %}
+                <tr>
+                    <td>{{ drug.Dr_Name }}</td>
+                    <td>{{ drug.Dr_DOM }}</td>
+                    <td>{{ drug.Dr_DOE }}</td>
+                    <td>{{ drug.Dr_MRP }}</td>
+                    <td>{{ drug.Dr_Cost_Price }}</td>
+                    <td>{{ drug.Dr_Type }}</td>
+                    <td>{{ drug.Dr_Use }}</td>
+                    <td>{{ drug.Dr_Quantity }}</td>
+                    <td>{{ drug.D_ID }}</td>
+                    <td>{{ drug.U_ID }}</td>
+                    <td>
+                        <div class="btn-group" role="group" aria-label="Actions">
+                            <a href="{{ url_for('update_drug', id=drug.Dr_Id) }}" class="btn btn-warning btn-sm me-3">Edit</a>
+                            <a href="{{ url_for('delete_drug', id=drug.Dr_Id) }}" class="btn btn-danger btn-sm me-3" onclick="return confirm('Are you sure?')">Delete</a>
+                        </div>
+                    </td>                                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item {% if not drugs.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('drugs', page=drugs.prev_num) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                {% for page_num in drugs.iter_pages() %}
+                    <li class="page-item {% if page_num == drugs.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('drugs', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% endfor %}
+
+                <li class="page-item {% if not drugs.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('drugs', page=drugs.next_num) }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+{% endblock %}
+

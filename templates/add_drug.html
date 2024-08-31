@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Add Drug</div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="Dr_Name">Name</label>
+                        <input type="text" class="form-control" id="Dr_Name" name="Dr_Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_DOM">Date of Manufacture</label>
+                        <input type="date" class="form-control" id="Dr_DOM" name="Dr_DOM" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_DOE">Date of Expiry</label>
+                        <input type="date" class="form-control" id="Dr_DOE" name="Dr_DOE" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_MRP">MRP</label>
+                        <input type="number" step="0.01" class="form-control" id="Dr_MRP" name="Dr_MRP" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_Cost_Price">Cost Price</label>
+                        <input type="number" step="0.01" class="form-control" id="Dr_Cost_Price" name="Dr_Cost_Price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_Type">Type</label>
+                        <input type="text" class="form-control" id="Dr_Type" name="Dr_Type" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_Use">Use</label>
+                        <input type="text" class="form-control" id="Dr_Use" name="Dr_Use" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Dr_Quantity">Quantity</label>
+                        <input type="number" class="form-control" id="Dr_Quantity" name="Dr_Quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="D_ID">Distributor ID</label>
+                        <input type="number" class="form-control" id="D_ID" name="D_ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="U_ID">User ID</label>
+                        <input type="number" class="form-control" id="U_ID" name="U_ID" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Drug</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

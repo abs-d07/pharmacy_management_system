@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Distributors</h1>
+        <a href="{{ url_for('add_distributor') }}" class="btn btn-primary mb-2">Add Distributor</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if distributors %}
+                    {% for distributor in distributors %}
+                    <tr>
+                        <td>{{ distributor.D_Name }}</td>
+                        <td>{{ distributor.D_ID }}</td>
+                        <td>{{ distributor.D_Phone_no }}</td>
+                        <td>{{ distributor.D_Address }}</td>
+                        <td>
+                            <a href="{{ url_for('update_distributor', id=distributor.D_ID) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="{{ url_for('delete_distributor', id=distributor.D_ID) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5">No distributors found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
