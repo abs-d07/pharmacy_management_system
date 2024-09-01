@@ -5,6 +5,11 @@ from functools import wraps
 from datetime import datetime
 # from app import db, Distributor  # Replace with your actual import path
 import pymysql  # Import pymysql to use with SQLAlchemy
+from sqlalchemy import text 
+from sqlalchemy import extract, func
+import plotly.graph_objs as go
+import plotly
+import json
 
 # Set pymysql as the MySQL driver
 pymysql.install_as_MySQLdb()
@@ -57,6 +62,19 @@ class Drug(db.Model):
     Dr_Quantity = db.Column(db.Integer, nullable=False)
     D_ID = db.Column(db.Integer, nullable=False)
     U_ID = db.Column(db.Integer, nullable=False)
+class Invoice(db.Model):
+    _tablename_ = 'invoice'
+    I_No = db.Column(db.Integer, primary_key=True)
+    I_Bill_Amount = db.Column(db.Float, nullable=False)
+    I_Time = db.Column(db.String(10))
+    I_Date = db.Column(db.Date, nullable=False)
+
+class BuysOrGenerates(db.Model):
+    _tablename_ = 'buys_or_generates'
+    id = db.Column(db.Integer, db.ForeignKey('customers.id'), primary_key=True)
+    Dr_ID = db.Column(db.String, db.ForeignKey('drug.Dr_Id'), primary_key=True)
+    I_No = db.Column(db.Integer, db.ForeignKey('invoice.I_No'), primary_key=True)
+    quantity = db.Column(db.Integer, nullable=False)
 
 class Distributor(db.Model):
     __tablename__ = 'distributor'
@@ -89,7 +107,55 @@ def login_required(f):
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+        # Query to calculate monthly/yearly data
+    invoices = db.session.query(
+        extract('year', Invoice.I_Date).label('year'),
+        extract('month', Invoice.I_Date).label('month'),
+        func.sum(Invoice.I_Bill_Amount).label('revenue')
+    ).group_by('year', 'month').all()
+    
+    print("Invoices Data:")
+    for invoice in invoices:
+        print(f"Year: {invoice.year}, Month: {invoice.month}, Revenue: {invoice.revenue}")
+
+
+    # Query to calculate COGS and Profit
+    profit_data = db.session.query(
+        extract('year', Invoice.I_Date).label('year'),
+        extract('month', Invoice.I_Date).label('month'),
+        func.sum((Drug.Dr_MRP - Drug.Dr_Cost_Price) * BuysOrGenerates.quantity).label('profit'),
+        func.sum(Drug.Dr_Cost_Price * BuysOrGenerates.quantity).label('cogs')
+    ).join(BuysOrGenerates, BuysOrGenerates.I_No == Invoice.I_No)\
+     .join(Drug, Drug.Dr_Id == BuysOrGenerates.Dr_ID)\
+     .group_by('year', 'month').all()
+
+    print("Profit Data:")
+    for data in profit_data:
+        print(f"Year: {data.year}, Month: {data.month}, Profit: {data.profit}, COGS: {data.cogs}")
+
+
+    # Prepare data for charts
+    months = [f"{int(row.month)}-{int(row.year)}" for row in invoices]
+    revenues = [row.revenue for row in invoices]
+    profits = [row.profit for row in profit_data]
+    cogs = [row.cogs for row in profit_data]
+
+    print("Months: ", months)
+    print("Revenues: ", revenues)
+    print("Profits: ", profits)
+    print("COGS: ", cogs)
+
+    # Create charts
+    revenue_chart = go.Scatter(x=months, y=revenues, mode='lines', name='Revenue')
+    profit_chart = go.Scatter(x=months, y=profits, mode='lines', name='Profit')
+    cogs_chart = go.Scatter(x=months, y=cogs, mode='lines', name='COGS')
+    print("revenue: ", revenues)
+    charts = json.dumps([revenue_chart, profit_chart, cogs_chart], cls=plotly.utils.PlotlyJSONEncoder)
+    
+    # Pass the data to the template
+    return render_template('dashboard.html', charts=charts, invoices=invoices, profits=profit_data)
+    # return render_template('index.html')
+    # return render_template('dashboard.html')
 
 
 
@@ -297,6 +363,55 @@ def delete_distributor(id):
 
 
 
+@app.route('/dashboard')
+def dashboard():
+    # Query to calculate monthly/yearly data
+    invoices = db.session.query(
+        extract('year', Invoice.I_Date).label('year'),
+        extract('month', Invoice.I_Date).label('month'),
+        func.sum(Invoice.I_Bill_Amount).label('revenue')
+    ).group_by('year', 'month').all()
+    
+    print("Invoices Data:")
+    for invoice in invoices:
+        print(f"Year: {invoice.year}, Month: {invoice.month}, Revenue: {invoice.revenue}")
+
+
+    # Query to calculate COGS and Profit
+    profit_data = db.session.query(
+        extract('year', Invoice.I_Date).label('year'),
+        extract('month', Invoice.I_Date).label('month'),
+        func.sum((Drug.Dr_MRP - Drug.Dr_Cost_Price) * BuysOrGenerates.quantity).label('profit'),
+        func.sum(Drug.Dr_Cost_Price * BuysOrGenerates.quantity).label('cogs')
+    ).join(BuysOrGenerates, BuysOrGenerates.I_No == Invoice.I_No)\
+     .join(Drug, Drug.Dr_Id == BuysOrGenerates.Dr_ID)\
+     .group_by('year', 'month').all()
+
+    print("Profit Data:")
+    for data in profit_data:
+        print(f"Year: {data.year}, Month: {data.month}, Profit: {data.profit}, COGS: {data.cogs}")
+
+
+    # Prepare data for charts
+    months = [f"{int(row.month)}-{int(row.year)}" for row in invoices]
+    revenues = [row.revenue for row in invoices]
+    profits = [row.profit for row in profit_data]
+    cogs = [row.cogs for row in profit_data]
+
+    print("Months: ", months)
+    print("Revenues: ", revenues)
+    print("Profits: ", profits)
+    print("COGS: ", cogs)
+
+    # Create charts
+    revenue_chart = go.Scatter(x=months, y=revenues, mode='lines', name='Revenue')
+    profit_chart = go.Scatter(x=months, y=profits, mode='lines', name='Profit')
+    cogs_chart = go.Scatter(x=months, y=cogs, mode='lines', name='COGS')
+    print("revenue: ", revenues)
+    charts = json.dumps([revenue_chart, profit_chart, cogs_chart], cls=plotly.utils.PlotlyJSONEncoder)
+    
+    # Pass the data to the template
+    return render_template('dashboard.html', charts=charts, invoices=invoices, profits=profit_data)
 
 
 if __name__ == '__main__':
