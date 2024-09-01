@@ -1,123 +1,42 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <!-- Add your sidebar items here -->
-        </div>
-
-        <!-- Main Content -->
-        <div class="col-md-10 main-content">
-            <h1>Brain Health Dashboard</h1>
-            
-            <!-- Row for Brain Visual and Main Stats -->
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- 3D Brain Visual -->
-                    <div id="brain-visual">
-                        <!-- You might use a 3D model or image here -->
-                        <img src="{{ url_for('static', filename='images/brain.png') }}" alt="Brain Visual" />
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <!-- Health Stats -->
-                    <div class="stat-card">
-                        <h2>Pulse Rate</h2>
-                        <canvas id="pulseRateChart"></canvas>
-                    </div>
-                    <div class="stat-card">
-                        <h2>Health Index</h2>
-                        <p>75%</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Additional Stats and Graphs -->
-            <div class="row">
-                <div class="col-md-4">
-                    <!-- Heart Activity -->
-                    <div class="stat-card">
-                        <h2>Heart Activity</h2>
-                        <p>Normal</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <!-- Breath Activity -->
-                    <div class="stat-card">
-                        <h2>Breath Activity</h2>
-                        <p>Normal</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <!-- All Activity -->
-                    <div class="stat-card">
-                        <h2>All Activity</h2>
-                        <p>Normal</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Mood Visualizer -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mood-visualizer">
-                        <h2>Mood Visualizer</h2>
-                        <canvas id="moodChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JS scripts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Pulse Rate Chart
-    var ctx = document.getElementById('pulseRateChart').getContext('2d');
-    var pulseRateChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Pulse Rate',
-                data: [60, 65, 70, 75, 80, 85],
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Mood Chart (example data)
-    var ctx2 = document.getElementById('moodChart').getContext('2d');
-    var moodChart = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: ['Routine', 'Consult', 'Emergency'],
-            datasets: [{
-                data: [27, 37, 36],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(75, 192, 192, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)'
-                ],
-                borderWidth: 1
-            }]
-        }
-    });
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    
+    <!-- Charts -->
+    <div id="financial-chart"></div>
+    <script>
+        var charts = {{ charts|safe }};
+        Plotly.newPlot('financial-chart', charts);
+    </script>
+    
+    <!-- Monthly Data Table -->
+    <!-- <h2>Monthly Data</h2>
+    <table border="1">
+        <tr>
+            <th>Month</th>
+            <th>Revenue</th>
+            <th>COGS</th>
+            <th>Profit</th>
+        </tr>
+        {% for data in monthly_data %}
+        <tr>
+            <td>{{ data.year }}-{{ "%02d"|format(data.month) }}</td>
+            <td>{{ data.revenue }}</td>
+            <td>{{ data.cogs }}</td>
+            <td>{{ data.profit }}</td>
+        </tr>
+        {% endfor %}
+    </table> -->
+</body>
+</html>
 {% endblock %}
