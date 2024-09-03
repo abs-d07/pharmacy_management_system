@@ -249,7 +249,7 @@ def signup():
         flash('Sign up successful! You can now log in.', 'success')
         return redirect(url_for('login'))
 
-    return render_template('login.html')
+    return render_template('signup.html')
 
 
 @app.route('/logout')
