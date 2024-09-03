@@ -10,6 +10,7 @@ from sqlalchemy import extract, func
 import plotly.graph_objs as go
 import plotly
 import json
+from sqlalchemy.exc import IntegrityError
 
 # Set pymysql as the MySQL driver
 pymysql.install_as_MySQLdb()
@@ -88,6 +89,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # return redirect(url_for('login'))
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -159,6 +161,64 @@ def index():
 
 
 
+# @app.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         dob = request.form['dob']  # Date should be in 'YYYY-MM-DD' format
+#         phone_no = request.form['phone_no']
+#         address = request.form['address']
+        
+#         # Validate and format date
+#         try:
+#             dob = datetime.strptime(dob, '%d-%m-%Y').strftime('%Y-%m-%d')
+#         except ValueError:
+#             flash('Invalid date format. Please use DD-MM-YYYY.', 'danger')
+#             return redirect(url_for('signup'))
+        
+#         # Check if the username already exists
+#         if User.query.filter_by(U_Name=username).first():
+#             flash('Username already exists', 'danger')
+#             return redirect(url_for('signup'))
+        
+#         # Create a new user and add to the database
+#         new_user = User(U_Name=username, U_DOB=dob, U_Phone_no=phone_no, U_Address=address)
+#         new_user.set_password(password)
+#         db.session.add(new_user)
+#         db.session.commit()
+        
+#         flash('Sign up successful! You can now log in.', 'success')
+#         return redirect(url_for('login'))
+    
+#     return render_template('signup.html')
+
+
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         user = User.query.filter_by(U_Name=username).first()
+#         if user and check_password_hash(user.U_Password, password):
+#             session['user_id'] = user.U_id
+#             return redirect(url_for('index'))
+#         flash('Invalid username or password')
+#     return render_template('login.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(U_Name=username).first()
+        if user and user.check_password(password):
+            session['user_id'] = user.U_id
+            return redirect(url_for('index'))
+        flash('Invalid username or password', 'danger')
+    return render_template('login.html')
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -167,7 +227,7 @@ def signup():
         dob = request.form['dob']  # Date should be in 'YYYY-MM-DD' format
         phone_no = request.form['phone_no']
         address = request.form['address']
-        
+
         # Validate and format date
         try:
             dob = datetime.strptime(dob, '%d-%m-%Y').strftime('%Y-%m-%d')
@@ -179,7 +239,7 @@ def signup():
         if User.query.filter_by(U_Name=username).first():
             flash('Username already exists', 'danger')
             return redirect(url_for('signup'))
-        
+
         # Create a new user and add to the database
         new_user = User(U_Name=username, U_DOB=dob, U_Phone_no=phone_no, U_Address=address)
         new_user.set_password(password)
@@ -188,21 +248,9 @@ def signup():
         
         flash('Sign up successful! You can now log in.', 'success')
         return redirect(url_for('login'))
-    
-    return render_template('signup.html')
 
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(U_Name=username).first()
-        if user and check_password_hash(user.U_Password, password):
-            session['user_id'] = user.U_id
-            return redirect(url_for('index'))
-        flash('Invalid username or password')
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -312,13 +360,13 @@ def update_drug(id):
         return redirect(url_for('drugs'))
     return render_template('update_drug.html', drug=drug)
 
-@app.route('/delete_drug/<int:id>')
-@login_required
-def delete_drug(id):
-    drug = Drug.query.get_or_404(id)
-    db.session.delete(drug)
-    db.session.commit()
-    return redirect(url_for('drugs'))
+# @app.route('/delete_drug/<int:id>')
+# @login_required
+# def delete_drug(id):
+#     drug = Drug.query.get_or_404(id)
+#     db.session.delete(drug)
+#     db.session.commit()
+#     return redirect(url_for('drugs'))
 
 @app.route('/distributors')
 @login_required
@@ -361,7 +409,18 @@ def delete_distributor(id):
     db.session.commit()
     return redirect(url_for('distributors'))  # Updated to 'distributors'
 
-
+@app.route('/delete_drug/<int:id>')
+@login_required
+def delete_drug(id):
+    drug = Drug.query.get_or_404(id)
+    try:
+        db.session.delete(drug)
+        db.session.commit()
+        flash('Drug successfully deleted.', 'success')
+    except IntegrityError:
+        db.session.rollback()  # Rollback the session to prevent any partial commits
+        flash('Cannot delete this drug because it is referenced by other records (foreign key constraint).', 'danger')
+    return redirect(url_for('drugs'))
 
 @app.route('/dashboard')
 def dashboard():
