@@ -1,5 +1,5 @@
 body {
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; */
     font-family: Arial, sans-serif;
 }
 
@@ -21,4 +21,31 @@ body {
 
 .table th, .table td {
     text-align: center;
+}
+
+/* Container for sliding effect */
+.auth-container {
+    position: relative;
+    width: 200%; /* Width of both forms combined */
+    transition: transform 0.5s ease-in-out;
+}
+
+/* Individual forms */
+.auth-form {
+    width: 50%; /* Each form occupies half of the container's width */
+    float: left;
+    box-sizing: border-box; /* Ensures padding/margins are included in the width */
+    padding: 20px; /* Adds padding to each form */
+}
+
+/* Ensure that the auth-card does not allow overflow */
+.auth-card {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+/* Center the nav tabs */
+.card-header-tabs {
+    justify-content: center;
 }
