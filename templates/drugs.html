@@ -3,6 +3,20 @@
 {% block content %}
 <div class="row">
     <div class="col-md-12">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-2">
+                    <!-- {% for category, message in messages %} -->
+                        <!-- <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ messages }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div> -->
+                    <!-- {% endfor %} -->
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <h1>Drugs</h1>
         <a href="{{ url_for('add_drug') }}" class="btn btn-primary mb-2">Add Drug</a>
         <table class="table table-striped">
@@ -71,4 +85,3 @@
     </div>
 </div>
 {% endblock %}
-
